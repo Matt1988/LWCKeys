@@ -5,17 +5,15 @@ import java.util.logging.Logger;
 
 import me.Matt1988.lwckeys.commands.LWCKeysCommands;
 
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.event.Event;
+import org.bukkit.event.Event.Priority;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.util.config.Configuration;
 
 
 import com.griefcraft.lwc.LWC;
-import com.griefcraft.lwc.LWCPlugin;
 import com.griefcraft.model.Protection;
 
 
@@ -29,35 +27,38 @@ public class LWCKeys extends JavaPlugin {
 	protected static String KEY_UNLOCK_TEXT = "&2Oh you have a key! Here you go.";
 	protected static boolean OP_MAKE_KEY = true;
 	
-	public LWC lwc = null;
+	
+	public LWC lwc;
 	public final Logger logger = Logger.getLogger("Minecraft");
 
+	public void init() {
+        LWC.getInstance().getModuleLoader().registerModule(this, new LWCKeysModuleListener(this));
+        info("Registered Economy Module into LWC successfully! Version: " + getDescription().getVersion());
+    }
 
-	@Override
-	public void onDisable() {
-		logger.info("[LWCKeys] has been disabled]");
-	}
+    public void onEnable() {
+        Plugin lwc = getServer().getPluginManager().getPlugin("LWC");
+        loadconfig();
+        if (lwc != null) {
+            init();
+        } else {
+            // register the server listener
+            getServer().getPluginManager().registerEvent(Event.Type.PLUGIN_ENABLE, new LWCKeysServerListener(this), Priority.Monitor, this);
+            
+            info("Waiting for LWC to be enabled...");
+        }
+        getCommand("lwckeys").setExecutor(new LWCKeysCommands(this));
+        info("has successfully loaded");
+    }
 
-	@Override
-	public void onEnable() {
-		//load config
-		loadconfig();
-		
-		PluginManager pm = Bukkit.getServer().getPluginManager();
-		logger.info("[LWCKeys] successfully enabled");	
-		pm.registerEvent(Event.Type.PLAYER_INTERACT, new LWCKeysPlayerListener(this), Event.Priority.Monitor, this);
-		pm.registerEvent(Event.Type.CUSTOM_EVENT, new LWCKeysInventoryListener(this), Event.Priority.Monitor, this);
-		
-		getCommand("lwckeys").setExecutor(new LWCKeysCommands(this));
-		
-		
-		
-		
-		
-		
-		
-		
-	}
+    public void onDisable() {
+
+    }
+
+    private void info(String message) {
+        logger.info("[LWCKeys]: " + message);
+    }
+
 	
 	/*
 	 * loadconfig()
@@ -68,8 +69,8 @@ public class LWCKeys extends JavaPlugin {
 		this.config = getConfiguration();
 		this.config.load();
 		KEY_ITEM = this.config.getInt("General.KEY_ITEM", 348);
-		KEY_CREATED_TEXT = this.config.getString("General.KEY_CREATED_TEXT", "&2Key made for protection owned by &4%p.");
-		KEY_UNLOCK_TEXT = this.config.getString("General.KEY_UNLOCK_TEXT", "&2You have unlocked a chest belonging to &4%p.");
+		KEY_CREATED_TEXT = this.config.getString("General.KEY_CREATED_TEXT", "&2Key made for &4%b&2 owned by &4%o.");
+		KEY_UNLOCK_TEXT = this.config.getString("General.KEY_UNLOCK_TEXT", "&2You have unlocked a &4%b &2belonging to &4%o.");
 		OP_MAKE_KEY = this.config.getBoolean("General.OP_MAKE_KEY", true);
 		this.config.save();
 	}
@@ -82,23 +83,6 @@ public class LWCKeys extends JavaPlugin {
 	 * 
 	 * if the lwc plugin isn't installed on the server, this will return false.
 	 */
-	public boolean lwcHook() {
-		Plugin lwcPlugin = getServer().getPluginManager().getPlugin("LWC");
-		if (lwcPlugin == null)
-			return false;
-		
-		
-		if (lwc == null)
-		{
-			
-			if(lwcPlugin != null) {
-			    lwc = ((LWCPlugin) lwcPlugin).getLWC();
-			    return true;
-			}
-			
-		}
-		return true;
-	}
 	
 	
 	/*
@@ -132,7 +116,8 @@ public class LWCKeys extends JavaPlugin {
 	public String textParse(String t, Protection protection) {
 		String text = textParse(t);
 		
-		text = text.replace("%p", protection.getOwner());
+		text = text.replace("%o", protection.getOwner());
+		text = text.replace("%b", protection.getBlock().getType().name());
 		
 		return text;
 	}
