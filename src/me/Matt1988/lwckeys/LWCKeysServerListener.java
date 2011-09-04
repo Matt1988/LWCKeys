@@ -25,7 +25,7 @@ public class LWCKeysServerListener extends ServerListener {
         Plugin plugin = event.getPlugin();
 
         if (plugin instanceof LWCPlugin) {
-            this.plugin.init();
+            this.plugin.lwcInit();
         }
     }
 
