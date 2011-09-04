@@ -83,8 +83,9 @@ public class LWCKeys extends JavaPlugin {
 		KEY_CREATED_TEXT = this.config.getString("General.KEY_CREATED_TEXT", "&4Notice:&f You have created a key for &4%b&f owned by &e%o");
 		KEY_UNLOCK_TEXT = this.config.getString("General.KEY_UNLOCK_TEXT", "&4Notice:&f You have unlocked a &4%b&f owned by &e%o");
 		OP_MAKE_KEY = this.config.getBoolean("General.OP_MAKE_KEY", true);
-		disabledPlayers = this.config.getList("disabledPlayers");
+		disabledPlayers = this.config.getList("players.disabled");
 		if (disabledPlayers == null) {
+			getServer().broadcastMessage("test");
 			disabledPlayers = new ArrayList<Object>();
 		}
 		this.config.save();
@@ -111,7 +112,11 @@ public class LWCKeys extends JavaPlugin {
 	 * @since v0.5
 	 */
 	public boolean isPlayerDisabled(String name) {
-		return this.disabledPlayers.contains(name);
+		if(disabledPlayers.contains(name)) {
+			return true;
+		}
+		return false;
+		
 	}
 	
 	/**
