@@ -1,6 +1,6 @@
 name: LWCKeys
 main: me.Matt1988.lwckeys.LWCKeys
-version: 0.1
+version: 0.5
 description: RegionShops. A plugin that interfaces with Iconomy and WorldGuard to create region shops.
 commands:
    lwckeys:
