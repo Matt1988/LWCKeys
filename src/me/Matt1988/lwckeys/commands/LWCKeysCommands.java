@@ -37,10 +37,42 @@ public class LWCKeysCommands implements CommandExecutor {
 			 * Reloads the plugins config file.
 			 * Works in Console as well.
 			 */
-			if (args[0].equalsIgnoreCase("reload") && (sender.isOp() || !(sender instanceof Player))) {
+			if (args[0].equalsIgnoreCase("reload") ) {
+				//permissions
+				
+				if (sender instanceof Player) {
+					Player player = (Player) sender;
+					if (!plugin.playerHasPermission(player, "lwckeys.admin.reload", true)) {
+						player.sendMessage(ChatColor.RED + "[LWCKeys]: You do not have permission to use this command");
+						return true;
+					}
+				}
+				
 				plugin.loadconfig();
 				sender.sendMessage(ChatColor.DARK_RED + "[LWCKeys] reloaded");
 				return true;
+			}
+			
+			if (sender instanceof Player && args[0].equalsIgnoreCase("toggle")) {
+				Player player = (Player) sender;
+				//Permissions
+				if (!plugin.playerHasPermission(player, "lwckeys.general.toggle", false)){
+					sender.sendMessage(ChatColor.RED + "[LWCKeys]: You do not have permission to use this command");
+					return true;
+				}
+					
+				
+					if(plugin.isPlayerDisabled(player.getName())) {
+						plugin.remDisabledPlayer(player.getName());
+						player.sendMessage(ChatColor.GREEN + "[LWCKeys] - You have turned on keys for ALL of your protections");
+						return true;
+					}
+					
+					else {
+						plugin.addDisabledPlayer(player.getName());
+						player.sendMessage(ChatColor.GREEN + "[LWCKeys] - You have turned off keys for ALL of your protections");
+						return true;
+					}
 			}
 			
 
